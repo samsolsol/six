@@ -11,12 +11,14 @@ from fonctions import *
 
 # Arrêt du programme si l'utilisateur n'est pas en root
 
-if not 'SUDO_UID' in os.environ.keys():
-  print("Vous devez posséder les droits root pour utiliser ce programme")
-  sys.exit(1)
+#if not 'SUDO_UID' in os.environ.keys():
+#  print("Vous devez posséder les droits root pour utiliser ce programme")
+#  sys.exit(1)
 
-else:
-	print("\n## Bienvenue dans le programme d'automatisation de fourniture d'adresses ##\n")
+#else:
+#	print("\n## Bienvenue dans le programme d'automatisation de fourniture d'adresses ##\n")
+	
+choix_distrib = input("\n\nSur quelle type de serveur êtes-vous? Tapez d pour debian ou c pour centos/redhat\n")
 
 # Validation de l'interface
 
@@ -151,30 +153,22 @@ while i < nb_vlan:
 
 	# Ecriture du fichier /etc/network/interfaces
 
-	interfaces_file = open("/etc/network/interfaces","a")
+	if choix_distrib == "d":
 
-	interfaces_file.write("\nauto " + interface + "." + str(i + 1) + \
-		"\niface " + interface + "." + str(i + 1) + " inet static" + \
-		"\n    address " + str(octet_1) + "." + str(octet_2)+ "." + str(octet_3) + "." + str(interface_address[i]) + \
-		"\n    netmask " + netmask[i] + \
-		"\n    network " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(network_address[i]) + \
-		"\n    broadcast " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(broadcast_address[i]) + \
-		"\n    vlan_raw_device " + interface + "\n")
+		write_interfaces_debian(interface, i, octet_1, octet_2, octet_3, interface_address, network_address, broadcast_address, netmask)
 
-	interfaces_file.close()
-
+	else:
+		write_interfaces_centos(i, interface, netmask, octet_1, octet_2, octet_3, interface_address)
+		
 	# Ecriture du fichier /etc/dhcp/dhcpd.conf
 
-	dhcpd_files = open("/etc/dhcp/dhcpd.conf","a")
+	if choix_distrib == "d":
 
-	dhcpd_files.write("\n# VLAN " + str(i + 1) + \
-		"\nsubnet " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(network_address[i]) + " netmask " + netmask[i] + " {" + \
-		"\n    option routers " + str(octet_1) + "." + str(octet_2)+ "." + str(octet_3) + "." + str(interface_address[i]) + ";" + \
-		"\n    option broadcast-address " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(broadcast_address[i]) + ";" + \
-		"\n    range " + str(octet_1) + "." + str(octet_2)+ "." + str(octet_3) + "." + str(interface_address[i] + 1) + " " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(broadcast_address[i] - 1) + ";" + \
-		"\n}\n")
+		write_dhcpd_debian(i, octet_1,octet_2, octet_3,interface_address, network_address, broadcast_address, netmask)
+	
+	else:
 
-	dhcpd_files.close()
+		write_dhcpd_centos(i, octet_1,octet_2, octet_3,interface_address, network_address, broadcast_address, netmask)
 
 	# print("\n# VLAN " + str(i + 1) + \
 	# 	"\nsubnet " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(network_address[i]) + " netmask " + netmask[i] + " {" + \
@@ -185,11 +179,9 @@ while i < nb_vlan:
 
 	i += 1
 
-# Ajout de Authoritative
+# Ajout de Authoritative à dhcpd.conf
 
-dhcpd_files = open("/etc/dhcp/dhcpd.conf","a")
-dhcpd_files.write("\nauthoritative")
-dhcpd_files.close()
+write_dhcpd_infos()
 
 # Transformation de ma liste en str
 
@@ -197,7 +189,6 @@ str_list_subnet = " ".join(list_subnet)
 
 # Ecriture du fichier /etc/default/isc-dhcp-server
 
-isc_dhcp_server_files = open("/etc/default/isc-dhcp-server","w")
-isc_dhcp_server_files.write("INTERFACES=\"" + str_list_subnet + "\"")
-isc_dhcp_server_files.close()
+if choix_distrib == "d":
 
+	write_isc_dhcp_server(str_list_subnet)

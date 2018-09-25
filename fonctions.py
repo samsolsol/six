@@ -50,3 +50,87 @@ def test_netmask(nb_ip_address):
 
 	if nb_ip_address == 253:
 		return "255.255.255.0"
+
+# Ecriture du fichier /etc/network/interfaces
+
+def write_interfaces_debian(interface, i, octet_1, octet_2, octet_3, interface_address, network_address, broadcast_address, netmask):
+
+	interfaces_file = open("/etc/network/interfaces","a")
+
+	interfaces_file.write("\nauto " + interface + "." + str(i + 1) + \
+		"\niface " + interface + "." + str(i + 1) + " inet static" + \
+		"\n    address " + str(octet_1) + "." + str(octet_2)+ "." + str(octet_3) + "." + str(interface_address[i]) + \
+		"\n    netmask " + netmask[i] + \
+		"\n    network " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(network_address[i]) + \
+		"\n    broadcast " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(broadcast_address[i]) + \
+		"\n    vlan_raw_device " + interface + "\n")
+
+	interfaces_file.close()
+
+# Ecriture dans le dossier /etc/sysconfig/network-scripts/
+
+def write_interfaces_centos(i, interface, netmask, octet_1, octet_2, octet_3, interface_address):
+
+	interfaces_file = open("/etc/sysconfig/network-scripts/ifcfg-" + interface + ":" + str(i + 1) , "a")
+
+	interfaces_file.write("\nDEVICE=" + interface + ":" + str(i + 1) + \
+		"\nTYPE=Ethernet" + \
+		"\nBOOTPROTO=dhcp" + \
+		"\nIPADDR=" + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(interface_address[i]) + \
+		"\nNETMASK=" + netmask[i] + \
+		"\nNAME=" + interface + ":" + str(i + 1) + \
+		"\nONBOOT=yes" + \
+		"\nVLAN=yes")
+
+	interfaces_file.close()
+
+# Ecriture du fichier /etc/dhcp/dhcpd.conf
+
+def write_dhcpd_debian(i, octet_1,octet_2, octet_3,interface_address, network_address, broadcast_address, netmask):
+
+	dhcpd_files = open("/etc/dhcp/dhcpd.conf","a")
+
+	dhcpd_files.write("\n# VLAN " + str(i + 1) + \
+		"\nsubnet " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(network_address[i]) + " netmask " + netmask[i] + " {" + \
+		"\n    option routers " + str(octet_1) + "." + str(octet_2)+ "." + str(octet_3) + "." + str(interface_address[i]) + ";" + \
+		"\n    option broadcast-address " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(broadcast_address[i]) + ";" + \
+		"\n    range " + str(octet_1) + "." + str(octet_2)+ "." + str(octet_3) + "." + str(interface_address[i] + 1) + " " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(broadcast_address[i] - 1) + ";" + \
+		"\n}\n")
+
+	dhcpd_files.close()
+
+# Ecriture du fichier /etc/dhcp/dhcpd.conf
+
+def write_dhcpd_centos(i, octet_1,octet_2, octet_3,interface_address, network_address, broadcast_address, netmask):
+
+	dhcpd_files = open("/etc/dhcp/dhcpd.conf","a")
+
+	dhcpd_files.write("\n\n# VLAN " + str(i + 1) + \
+		"\nsubnet " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(network_address[i]) + " netmask " + netmask[i] + " {" + \
+		"\n    option routers " + str(octet_1) + "." + str(octet_2)+ "." + str(octet_3) + "." + str(interface_address[i]) + ";" + \
+		"\n    option broadcast-address " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(broadcast_address[i]) + ";" + \
+		"\n    range " + str(octet_1) + "." + str(octet_2)+ "." + str(octet_3) + "." + str(interface_address[i] + 1) + " " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(broadcast_address[i] - 1) + ";" + \
+		"\n}\n")
+
+	dhcpd_files.close()
+
+# Ajout config à dhcpd.conf
+
+def write_dhcpd_infos():
+
+	dhcpd_files = open("/etc/dhcp/dhcpd.conf","a")
+	dhcpd_files.write("\nauthoritative;\nddns-update-style none;\nmax-lease-time 7200;\ndefault-lease-time 600;")
+	dhcpd_files.close()
+
+
+# Ecriture du fichier /etc/default/isc-dhcp-server
+
+def write_isc_dhcp_server(str_list_subnet):
+	
+	isc_dhcp_server_files = open("/etc/default/isc-dhcp-server","w")
+	isc_dhcp_server_files.write("INTERFACES=\"" + str_list_subnet + "\"")
+	isc_dhcp_server_files.close()
+
+
+
+
