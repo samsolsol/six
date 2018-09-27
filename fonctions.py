@@ -3,15 +3,16 @@
 
 import os
 
-# Fonctions
+## Fonctions ##
 
+# Récupération de la liste des interfaces du serveur
 def get_all_interfaces():
 
     list = os.listdir('/sys/class/net/')
    
     return " ".join(list)
 
-
+# Calcul du nombre d'adresses suite à l'application d'un masque de sous-réseau
 def test_nb_ip_address(nb_ip_address):
 
 	if nb_ip_address > 0 and nb_ip_address < 6:
@@ -32,24 +33,30 @@ def test_nb_ip_address(nb_ip_address):
 	if nb_ip_address >= 126 and nb_ip_address < 254:
 		return 253
 
-
+# Définition du masque en fonction du nombre d'adresses
 def test_netmask(nb_ip_address):
 	
+	# CIDR /29
 	if nb_ip_address == 5:
 		return "255.255.255.248"
 
+	# CIDR /28
 	if nb_ip_address == 13:
 		return "255.255.255.240"
 
+	# CIDR /27
 	if nb_ip_address == 29:
 		return "255.255.255.224"
 
+	# CIDR /26
 	if nb_ip_address == 61:
 		return "255.255.255.192"
 
+	# CIDR /25
 	if nb_ip_address == 125:
 		return "255.255.255.128"
 
+	# CIDR /24
 	if nb_ip_address == 253:
 		return "255.255.255.0"
 
@@ -57,7 +64,8 @@ def test_netmask(nb_ip_address):
 def write_interfaces_debian(interface, i, octet_1, octet_2, octet_3, interface_address, network_address, broadcast_address, netmask):
 
 	interfaces_file = open("/etc/network/interfaces","a")
-	interfaces_file.write("\nauto " + interface + "." + str(i + 1) + \
+	interfaces_file.write("\n\n# L'interface " + interface + "." + str(i + 1) + " a été configuré automatiquement par le script \"auto_vlan_dhcp.py\"." + \
+		"\nauto " + interface + "." + str(i + 1) + \
 		"\niface " + interface + "." + str(i + 1) + " inet static" + \
 		"\n    address " + str(octet_1) + "." + str(octet_2)+ "." + str(octet_3) + "." + str(interface_address[i]) + \
 		"\n    netmask " + netmask[i] + \
@@ -67,32 +75,24 @@ def write_interfaces_debian(interface, i, octet_1, octet_2, octet_3, interface_a
 
 	interfaces_file.close()
 
-# def display_interfaces_debian(interface, i, octet_1, octet_2, octet_3, interface_address, network_address, broadcast_address, netmask):
-
-# 	print("\nauto " + interface + "." + str(i + 1) + \
-# 		"\niface " + interface + "." + str(i + 1) + " inet static" + \
-# 		"\n    address " + str(octet_1) + "." + str(octet_2)+ "." + str(octet_3) + "." + str(interface_address[i]) + \
-# 		"\n    netmask " + netmask[i] + \
-# 		"\n    network " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(network_address[i]) + \
-# 		"\n    broadcast " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(broadcast_address[i]) + \
-# 		"\n    vlan_raw_device " + interface + "\n")
-
-# Ecriture dans le dossier /etc/sysconfig/network-scripts/
+# Ecriture dans l'interface de base dans dossier /etc/sysconfig/network-scripts/
 def write_main_interface(interface):
 	
 	interface_file = open("/etc/sysconfig/network-scripts/ifcfg-" + interface, "w")
-	interface_file.write("\nDEVICE=" + interface + \
+	interface_file.write("\n\n# L'interface " + interface + " a été configuré automatiquement par le script \"auto_vlan_dhcp.py\"." + \
+		"\nDEVICE=" + interface + \
 		"\nTYPE=Ethernet" + \
 		"\nBOOTPROTO=none" + \
 		"\nONBOOT=yes")
 	
 	interface_file.close()
 
-
+# Ecriture des VLANS dans /etc/sysconfig/network-scripts/
 def write_interfaces_centos(i, interface, netmask, octet_1, octet_2, octet_3, interface_address, network_address):
 	
 	interfaces_file = open("/etc/sysconfig/network-scripts/ifcfg-" + interface + "." + str(i + 1) , "a")
-	interfaces_file.write("\nDEVICE=" + interface + "." + str(i + 1) + \
+	interfaces_file.write("\n\n# L'interface " + interface + "." + str(i + 1)+ " a été configuré automatiquement par le script \"auto_vlan_dhcp.py\"." + 
+		"\nDEVICE=" + interface + "." + str(i + 1) + \
 		"\nBOOTPROTO=none" + \
 		"\nONBOOT=yes" + \
 		"\nIPADDR=" + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(interface_address[i]) + \
@@ -102,21 +102,12 @@ def write_interfaces_centos(i, interface, netmask, octet_1, octet_2, octet_3, in
 
 	interfaces_file.close()
 
-# def display_interfaces_centos(i, interface, netmask, octet_1, octet_2, octet_3, interface_address, network_address):
-
-# 	print("\nDEVICE=" + interface + "." + str(i + 1) + \
-# 		"\nBOOTPROTO=none" + \
-# 		"\nONBOOT=yes" + \
-# 		"\nIPADDR=" + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(interface_address[i]) + \
-# 		"\nNETMASK=" + netmask[i] + \
-# 		"\nNETWORK=" + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(network_address[i]) + \
-# 		"\nVLAN=yes")
-
 # Ecriture du fichier /etc/dhcp/dhcpd.conf
 def write_dhcpd_debian(i, octet_1, octet_2, octet_3, interface_address, network_address, broadcast_address, netmask):
 	
 	dhcpd_files = open("/etc/dhcp/dhcpd.conf","a")
-	dhcpd_files.write("\n# VLAN " + str(i + 1) + \
+	dhcpd_files.write("\n\n# Le VLAN " + str(i + 1) + " a été configurés automatiquement par le script \"auto_vlan_dhcp.py\"." + \
+		"\n# VLAN " + str(i + 1) + \
 		"\nsubnet " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(network_address[i]) + " netmask " + netmask[i] + " {" + \
 		"\n    option routers " + str(octet_1) + "." + str(octet_2)+ "." + str(octet_3) + "." + str(interface_address[i]) + ";" + \
 		"\n    option broadcast-address " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(broadcast_address[i]) + ";" + \
@@ -124,21 +115,13 @@ def write_dhcpd_debian(i, octet_1, octet_2, octet_3, interface_address, network_
 		"\n}\n")
 
 	dhcpd_files.close()
-
-# def display_dhcpd_debian(i, octet_1, octet_2, octet_3, interface_address, network_address, broadcast_address, netmask):
-
-# 	print("\n# VLAN " + str(i + 1) + \
-# 		"\nsubnet " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(network_address[i]) + " netmask " + netmask[i] + " {" + \
-# 		"\n    option routers " + str(octet_1) + "." + str(octet_2)+ "." + str(octet_3) + "." + str(interface_address[i]) + ";" + \
-# 		"\n    option broadcast-address " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(broadcast_address[i]) + ";" + \
-# 		"\n    range " + str(octet_1) + "." + str(octet_2)+ "." + str(octet_3) + "." + str(interface_address[i] + 1) + " " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(broadcast_address[i] - 1) + ";" + \
-# 		"\n}\n")
 
 # Ecriture du fichier /etc/dhcp/dhcpd.conf
 def write_dhcpd_centos(i, octet_1, octet_2, octet_3, interface_address, network_address, broadcast_address, netmask):
 	
 	dhcpd_files = open("/etc/dhcp/dhcpd.conf","a")
-	dhcpd_files.write("\n\n# VLAN " + str(i + 1) + \
+	dhcpd_files.write("\n\n# Le VLAN " + str(i + 1) + " a été configurés automatiquement par le script \"auto_vlan_dhcp.py\"." + \
+		"\n\n# VLAN " + str(i + 1) + \
 		"\nsubnet " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(network_address[i]) + " netmask " + netmask[i] + " {" + \
 		"\n    option routers " + str(octet_1) + "." + str(octet_2)+ "." + str(octet_3) + "." + str(interface_address[i]) + ";" + \
 		"\n    option broadcast-address " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(broadcast_address[i]) + ";" + \
@@ -146,15 +129,6 @@ def write_dhcpd_centos(i, octet_1, octet_2, octet_3, interface_address, network_
 		"\n}\n")
 
 	dhcpd_files.close()
-
-# def display_dhcpd_centos(i, octet_1, octet_2, octet_3, interface_address, network_address, broadcast_address, netmask):
-
-# 	print("\n\n# VLAN " + str(i + 1) + \
-# 		"\nsubnet " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(network_address[i]) + " netmask " + netmask[i] + " {" + \
-# 		"\n    option routers " + str(octet_1) + "." + str(octet_2)+ "." + str(octet_3) + "." + str(interface_address[i]) + ";" + \
-# 		"\n    option broadcast-address " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(broadcast_address[i]) + ";" + \
-# 		"\n    range " + str(octet_1) + "." + str(octet_2)+ "." + str(octet_3) + "." + str(interface_address[i] + 1) + " " + str(octet_1) + "." + str(octet_2) + "." + str(octet_3) + "." + str(broadcast_address[i] - 1) + ";" + \
-# 		"\n}\n")
 
 # Ajout config à dhcpd.conf
 def write_dhcpd_infos():
@@ -164,12 +138,14 @@ def write_dhcpd_infos():
 	
 	dhcpd_files.close()
 
-
 # Ecriture du fichier /etc/default/isc-dhcp-server
-def write_isc_dhcp_server(str_list_subnet):
+def write_isc_dhcp_server(list_subnet):
+
+	str_list_subnet = " ".join(list_subnet)
 	
 	isc_dhcp_server_files = open("/etc/default/isc-dhcp-server","w")
-	isc_dhcp_server_files.write("INTERFACES=\"" + str_list_subnet + "\"")
+	isc_dhcp_server_files.write("# Ce fichier a été configuré automatiquement par le script \"auto_vlan_dhcp.py\"" + \
+		"\n\nINTERFACES=\"" + str_list_subnet + "\"")
 	
 	isc_dhcp_server_files.close()
 
