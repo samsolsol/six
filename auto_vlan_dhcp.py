@@ -20,16 +20,28 @@ print("\n## Bienvenue dans le programme d'automatisation de fourniture d'adresse
 #Demande sur quelle distribution est lancé le script
 choix_distrib = input("\n\nSur quelle type de serveur êtes-vous? Tapez d pour debian ou c pour centos/redhat\n>>>")
 
-# Verification de l'installation du paquet "vlan"
+# Verification de l'installation du paquet "isc-dhcp-server" et du paquet "vlan"
 if choix_distrib == "d":
-	vlan_paquet = input("Avez-vous installé le paquet vlan 'o' ou 'n' (oui/non) ? \n>>>")
+	vlan_dhcp_paquet = input("Avez-vous installé le paquet isc-dhcp-server et le paquet vlan 'o' ou 'n' (oui/non) ? \n>>>")
 
-	if vlan_paquet == "n":
-		print("Le paquet vlan va être installé dans quelques secondes !")
+	if vlan_dhcp_paquet == "n":
+		print("Les paquets vont être installés dans quelques secondes !")
 
 		time.sleep(5)
 
+		os.system('apt-get install isc-dhcp-server')
 		os.system('apt-get install vlan')
+
+# Verification de l'installation du paquet dhcpd
+else:
+	vlan_dhcp_paquet = input("Avez-vous installé le paquet dhcp 'o' ou 'n' (oui/non) ? \n>>>")
+
+	if vlan_dhcp_paquet == "n":
+		print("Le paquet dhcp va être installé dans quelques secondes !")
+
+		time.sleep(5)
+
+		os.system('yum install dhcp')
 
 # Validation de l'interface
 ok_interface = ""
@@ -190,7 +202,6 @@ write_dhcpd_infos()
 # Ecriture du fichier /etc/default/isc-dhcp-server + affichage restart network et dhcp
 if choix_distrib == "d":
 
-	#write_isc_dhcp_server(str_list_subnet)
 	write_isc_dhcp_server(list_subnet)
 
 	print("La configuration est terminée !!")
