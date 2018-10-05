@@ -17,31 +17,37 @@ if os.geteuid() != 0:
 
 print("\n## Bienvenue dans le programme d'automatisation de fourniture d'adresses ##\n")
 
-#Demande sur quelle distribution est lancé le script
-choix_distrib = input("\n\nSur quelle type de serveur êtes-vous? Tapez d pour debian ou c pour centos/redhat\n>>>")
+choix_distrib = ""
+
+# Vérification de la distribution linux
+print("Nous allons vérifier sur quelle distribution est votre serveur...\n")
+
+time.sleep(2)
+
+choix_distrib = check_distrib(choix_distrib)
+
+time.sleep(2)
 
 # Verification de l'installation du paquet "isc-dhcp-server" et du paquet "vlan"
 if choix_distrib == "d":
-	vlan_dhcp_paquet = input("Avez-vous installé le paquet isc-dhcp-server et le paquet vlan 'o' ou 'n' (oui/non) ? \n>>>")
+	
+	print("\nVérification de la présence des paquets 'vlan' et 'isc-dhcp-server'.\n\nS'il ne sont pas installés, cela sera fait automatiquement!")
 
-	if vlan_dhcp_paquet == "n":
-		print("Les paquets vont être installés dans quelques secondes !")
+	time.sleep(5)
 
-		time.sleep(5)
-
-		os.system('apt-get install isc-dhcp-server')
-		os.system('apt-get install vlan')
+	check_packet("isc-dhcp-server", choix_distrib)
+	check_packet("vlan", choix_distrib)
 
 # Verification de l'installation du paquet dhcpd
 else:
-	vlan_dhcp_paquet = input("Avez-vous installé le paquet dhcp 'o' ou 'n' (oui/non) ? \n>>>")
+	
+	print("\nVérification de la présence du paquet 'dhcp'.\n\nS'il n'est pas installé, cela sera fait automatiquement!")
 
-	if vlan_dhcp_paquet == "n":
-		print("Le paquet dhcp va être installé dans quelques secondes !")
+	time.sleep(5)
 
-		time.sleep(5)
+	check_packet("dhcp", choix_distrib)
 
-		os.system('yum install dhcp')
+time.sleep(2)
 
 # Validation de l'interface
 ok_interface = ""
@@ -90,16 +96,6 @@ while ok_vlan != "o":
 	print("\nMerci de classer les vlans du plus grand au plus petit ! \n")
 
 	time.sleep(4)
-
-	# nb_ip_addresses = input("\nCombien de poste de travail souhaitez-vous configurer dans le VLAN 1?\n>>>")
-	# nb_ip_addresses = int(nb_ip_addresses)
-	# check_nb_ip_address = test_nb_ip_address(nb_ip_addresses)
-	# check_netmask = test_netmask(check_nb_ip_address)
-
-	# nb_ip_address.append(check_nb_ip_address)
-	# netmask.append(check_netmask)
-
-	# another_vlan = input("Voulez-vous configurer un autre VLAN? Tapez o ou n (oui/non)?\n>>>")
 
 	# Ajout d'un nouveau VLAN
 	while another_vlan == "o":
@@ -204,18 +200,26 @@ if choix_distrib == "d":
 
 	write_isc_dhcp_server(list_subnet)
 
-	print("La configuration est terminée !!")
 	time.sleep(2)
-	print("Vous devez maintenant relancer le réseau puis le service dhcp")
-	time.sleep(4)
-	print("\n#### Commande network: systemctl restart networking\n" + \
-		"\n#### Commande dhcp: systemctl restart isc-dhcp-server.service\n")
+
+	print("\n\nLe réseau puis le service dhcp vont maintenant être relancés")
+
+	os.system('systemctl restart networking')
+	os.system('systemctl restart isc-dhcp-server.service')
+
+	time.sleep(2)
+
+	print("La configuration est maintenant terminée !!")
 
 else:
 
-	print("La configuration est terminée !!")
 	time.sleep(2)
-	print("Vous devez maintenant relancer le réseau puis le service dhcp")
-	time.sleep(4)
-	print("\n#### Commande network: systemctl restart network\n" + \
-		"\n#### Commande dhcp: systemctl restart dhcpd\n")
+
+	print("\n\nLe réseau puis le service dhcp vont maintenant être relancés")
+
+	os.system('systemctl restart network')
+	os.system('systemctl restart dhcpd')
+
+	time.sleep(2)
+
+	print("La configuration est maintenant terminée !!")

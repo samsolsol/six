@@ -1,9 +1,54 @@
 #!/usr/local/bin/python3.7
 # -*-coding:utf-8 -*
 
-import os
+import os, sys
 
 ## Fonctions ##
+
+def check_distrib(choix_distrib):
+
+	distrib = os.popen('lsb_release -ds').readlines()
+	distrib_str = str(distrib)
+
+	if "CentOS" in distrib_str or "Red" in distrib_str:
+
+		print("Votre serveur est sur une distribution CentOS/RedHat\n")
+		return "c"
+
+	elif "Ubuntu" in distrib_str or "Debian" in distrib_str:
+
+		print("Votre serveur est sur une distribution Debian/Ubuntu\n")
+		return "d"
+
+	else:
+		print("Votre distribution n'est pas compatible avec ce script")
+		return sys.exit(1)
+
+def check_packet(packet, choix_distrib):
+	
+	if choix_distrib == "d":
+
+		# Récupération des paquets déjà installés sur le serveur
+		packets = os.popen('dpkg-query -l').readlines()
+		packets_str = str(packets)
+
+	else:
+
+		# Récupération des paquets déjà installés sur le serveur
+		packets = os.popen('yum list installed').readlines()
+		packets_str = str(packets)
+
+	# Vérification de la présence du paquet
+	if packet in packets_str:
+		print("\nLe paquet " + packet + " est déjà installé!")
+
+	# Installation du paquet
+	else:
+		if choix_distrib == "d":
+			os.system('apt-get install ' + packet)
+
+		else:
+			os.system('yum install ' + packet)
 
 # Récupération de la liste des interfaces du serveur
 def get_all_interfaces():
