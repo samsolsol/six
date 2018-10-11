@@ -5,25 +5,30 @@ import os, sys
 
 ## Fonctions ##
 
+# Vérification de la distribution Debian ou Centos
 def check_distrib(choix_distrib):
 
 	distrib = os.popen('lsb_release -ds').readlines()
 	distrib_str = str(distrib)
 
+	# Si la distribution est une Redhat ou CentOS, on renvoie "c" 
 	if "CentOS" in distrib_str or "Red" in distrib_str:
 
 		print("Votre serveur est sur une distribution CentOS/RedHat\n")
 		return "c"
 
+	# Si la distribution est une Ubuntu ou Debian, on renvoie "d" 
 	elif "Ubuntu" in distrib_str or "Debian" in distrib_str:
 
 		print("Votre serveur est sur une distribution Debian/Ubuntu\n")
 		return "d"
 
+	# Sinon, on ne retourne rien
 	else:
 		print("Votre distribution n'est pas compatible avec ce script")
-		return sys.exit(1)
+		return ""
 
+#On vérifie que les paquets sont bien installés
 def check_packet(packet, choix_distrib):
 	
 	if choix_distrib == "d":
@@ -32,7 +37,7 @@ def check_packet(packet, choix_distrib):
 		packets = os.popen('dpkg-query -l').readlines()
 		packets_str = str(packets)
 
-	else:
+	elif choix_distrib == "c":
 
 		# Récupération des paquets déjà installés sur le serveur
 		packets = os.popen('yum list installed').readlines()
@@ -47,7 +52,7 @@ def check_packet(packet, choix_distrib):
 		if choix_distrib == "d":
 			os.system('apt-get install ' + packet)
 
-		else:
+		elif choix_distrib == "c":
 			os.system('yum install ' + packet)
 
 # Récupération de la liste des interfaces du serveur

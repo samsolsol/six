@@ -6,7 +6,7 @@
 
 #!! Ce programme est à utiliser sur le serveur DHCP !!
 
-import os,sys,re,time
+import os,sys,re, time
 from fonctions import *
 from operator import *
 
@@ -39,13 +39,20 @@ if choix_distrib == "d":
 	check_packet("vlan", choix_distrib)
 
 # Verification de l'installation du paquet dhcpd
-else:
+elif choix_distrib == "c":
 	
 	print("\nVérification de la présence du paquet 'dhcp'.\n\nS'il n'est pas installé, cela sera fait automatiquement!")
 
 	time.sleep(5)
 
-	check_packet("dhcp", choix_distrib)
+	check_packet("dhcp.x86_64", choix_distrib)
+
+# Arrêt du script si la distribution n'est pas connue
+else:
+
+	print("\nVotre distribution n'est pas compatible avec ce script")
+
+	sys.exit(1)
 
 time.sleep(2)
 
@@ -176,7 +183,7 @@ while i < nb_vlan:
 		write_interfaces_debian(interface, i, octet_1, octet_2, octet_3, interface_address, network_address, broadcast_address, netmask)
 
 	# Ecriture dans le dossier /etc/sysconfig/network-scripts
-	else:
+	elif choix_distrib == "c":
 
 		write_main_interface(interface)
 		write_interfaces_centos(i, interface, netmask, octet_1, octet_2, octet_3, interface_address, network_address)
@@ -186,7 +193,7 @@ while i < nb_vlan:
 
 		write_dhcpd_debian(i, octet_1,octet_2, octet_3,interface_address, network_address, broadcast_address, netmask)
 	
-	else:
+	elif choix_distrib == "c":
 
 		write_dhcpd_centos(i, octet_1,octet_2, octet_3,interface_address, network_address, broadcast_address, netmask)
 
@@ -211,7 +218,7 @@ if choix_distrib == "d":
 
 	print("La configuration est maintenant terminée !!")
 
-else:
+elif choix_distrib == "c":
 
 	time.sleep(2)
 
@@ -223,3 +230,9 @@ else:
 	time.sleep(2)
 
 	print("La configuration est maintenant terminée !!")
+
+
+
+
+
+	
