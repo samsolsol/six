@@ -1,4 +1,4 @@
-### DOCUMENTATION
+# DOCUMENTATION
 
 Documentation du script auto_vlan_dhcp.py
 
@@ -11,11 +11,11 @@ Date 28/09/2018
 
 ## Informations générales
 
-# Le rôle
+### Le rôle
 
 Le rôle de ce script est de créer des vlans et de fournir les adresses de ces vlans par dhcp.
 
-# Les avantages
+### Les avantages
 
 Ce script va permettre d’éviter:
 les erreurs de calcul de masque de sous-réseau;
@@ -31,7 +31,7 @@ Il est composé de 2 fichiers:
 “auto_vlan_dhcp.py” qui correspond au script à proprement parlé
 “fonctions” qui représente les fonctions utilisées dans le script
 
-# Les prérequis
+### Les prérequis
 
 Ce script est à utiliser sur un serveur (Debian/Ubuntu - Centos/Redhat) qui jouera le rôle de serveur DHCP.
 
@@ -47,11 +47,11 @@ root@localhost /]# chmod +x fonctions.py
 Le script doit être exécuté en tant que super-utilisateur (root). Si ce n’est pas le cas, le script ne se lancera pas.
 
 
-# Utilisation
+### Utilisation
 
 Le script va échanger avec l’utilisateur afin de recueillir des informations pour écrire dans le fichiers de configuration.
 
-# Vérification de la distribution
+### Vérification de la distribution
 
 Dans un premier temps, le script va déterminer quel distribution est installée sur le serveur. Tout est automatique vous n’avez rien à faire.
 
@@ -64,19 +64,19 @@ Ensuite, le script va rechercher si le paquet “isc-dhcp-server” et le paquet
 Si vous êtes sous Centos, cela concerne uniquement le paquet “dhcp”.
 
 
-# Choix de l’interface
+### Choix de l’interface
 
 Maintenant il va falloir choisir l’interface sur laquelle vous souhaitez créer vos vlans.
 Toutes les interfaces présentent sur votre serveur seront listées, il vous faudra en choisir une et la réécrire après les “>>>”
 
 Tapez “o” pour confirmer ou “n” pour choisir de nouveau une interface.
 
-## Choix de l’adresse réseau
+### Choix de l’adresse réseau
 Vous devez ici sélectionner l’adresse ip sur laquelle vous souhaitez que vos vlans soient créés. Si l’adresse rentrée n’est pas valide, il faudra la réécrire de nouveau.
 
 Il faut ensuite valider cette adresse avec “o” ou “n”:
 
-# Composition des VLANS
+### Composition des VLANS
 
 Important: Les vlans doivent être classés du plus grand au plus petit pour que le script fonctionne !
 
@@ -97,7 +97,7 @@ Il faut maintenant confirmer la liste des vlans, “o” pour oui et “n” pou
 
 Comme indiqué, les masques sont appliqués au nombre de postes désirés, ce qui vous attribuera la plupart du temps quelques adresses ip supplémentaires. Ces adresses seront disponibles pour l’ajout éventuel de postes supplémentaires.
 
-# Ecriture des fichiers de configuration
+### Ecriture des fichiers de configuration
 
 Maintenant que les vlans ont été validés, le script va écrire dans les fichiers de configuration suivants:
 
